@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "env-cmd node bin/app.js",
+    "start": "node bin/app.js",
     "build": "tsc",
     "dev": "nodemon src/app.ts"
   },
