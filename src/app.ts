@@ -5,7 +5,7 @@ import { LoggerFactory } from "./Logger/LoggerFactory";
 
 const logger = LoggerFactory.getLogger();
 const app = express();
-app.use(
+ app.use(
   cors({
     origin: "https://taskmanagement-4l0e.onrender.com",
     methods: ["GET", "POST", "PUT", "DELETE"],
