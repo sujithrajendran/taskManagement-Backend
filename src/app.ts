@@ -7,7 +7,7 @@ const logger = LoggerFactory.getLogger();
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://taskmanagement-4l0e.onrender.com",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
     credentials: true
