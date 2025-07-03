@@ -85,12 +85,12 @@ router.post("/", async (req: any, res: any) => {
     if (!task || !task.taskName) {
       return res.status(400).json({ error: "TaskName is required" });
     }
-    await db.collection(COLLECTION).createIndex({ taskName: 1 }, { unique: true });
     const db = await new DBConnectionService().getDBConnection(DATABASE);
 
     task.isActive = true;
     task.taskId = await getNextTaskIdFromDB(db);
 
+    await db.collection(COLLECTION).createIndex({ taskName: 1 }, { unique: true });
     await db.collection(COLLECTION).insertOne(task);
     res
       .status(201)
