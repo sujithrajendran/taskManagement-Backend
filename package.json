@@ -33,7 +33,9 @@
     "node-persist": "^4.0.4",
     "pg": "^8.16.2",
     "uuid": "^11.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "@types/node": "^20.5.1",
+   "typescript": "^5.0.0"
   },
    "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -41,9 +43,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.15.4",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "devDependencies": {
-   "@types/node": "^20.5.1",
-   "typescript": "^5.0.0"
+    "ts-node": "^10.9.2"
 }
 }
