@@ -1,10 +1,15 @@
 import express from "express";
-import DBConnectionService from "../dbService/DbConnectionService";
 import { LoggerFactory } from "../Logger/LoggerFactory";
-import { Db } from "mongodb";
+import DBConnectionService from "../dbService/DbConnectionService";
+import { User } from "../model/User";
+import { HelperFunction } from "../Helpers/HelperFunction";
+import { authenticate } from "../Auth/Authenticate";
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
-const COLLECTION = "task";
+const SIGNIN_COLLECTION = "signin";
+const Task_COLLECTION = "task";
 const DATABASE = "taskmanagement";
 const logger = LoggerFactory.getLogger();
 
@@ -20,26 +25,83 @@ const projection = {
   priority: 1
 };
 
-async function getNextTaskIdFromDB(db: Db): Promise<number> {
-  const lastTask = await db
-    .collection(COLLECTION)
-    .find({ taskId: { $exists: true } })
-    .sort({ taskId: -1 })
-    .limit(1)
-    .project({ taskId: 1 })
-    .toArray();
-  const lastId = parseInt(lastTask[0]?.taskId || "100", 10);
-  const nextId = lastId + 1;
-  return nextId;
-}
+// Register
+router.post("/register", async (req: any, res: any) => {
+  try {
+    logger.info(`Inside regstering the user ::`);
+    if (!req.body) {
+      return res.status(400).json({ error: "SignUp details is required" });
+    }
+    const db = await new DBConnectionService().getDBConnection(DATABASE);
+    const userId = await new HelperFunction().getNextUserIdFromDB(db);
+    const user: User = new User(
+      req.body.userName,
+      req.body.password,
+      req.body.email,
+      new Date(),
+      userId
+    );
+    const hashed = await bcrypt.hash(user.password, 10);
+    user.password = hashed;
+    await db
+      .collection(SIGNIN_COLLECTION)
+      .createIndex({ email: 1 }, { unique: true });
+    await db.collection(SIGNIN_COLLECTION).insertOne(user);
+    res.status(201).json({
+      message: "User registered successfully",
+      userName: user.userName
+    });
+
+    res.status(201).json({ message: "User created" });
+  } catch (error: any) {
+    if (error.code === 11000 && error.keyPattern?.taskName) {
+      return res.status(400).json({ error: "User Email already present" });
+    }
+    logger.error("Error while registering the user:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Login
+router.post("/login", async (req: any, res: any) => {
+  try {
+    logger.info(`Inside login :: ${JSON.stringify(req.body)}`);
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Please enter email and password" });
+    }
+    const db = await new DBConnectionService().getDBConnection(DATABASE);
+    const user: any = await db
+      .collection(SIGNIN_COLLECTION)
+      .findOne(
+        { isActive: true, email: email },
+        { projection: { email: 1, password: 1, userId: 1 } }
+      );
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { userId: user.userId, email: user.email },
+      process.env.JWT_SECRET
+      // {
+      //   expiresIn: "10h"
+      // }
+    );
+    res.json({ token });
+  } catch (error) {
+    logger.error("Error while login:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 // GET all tasks
-router.get("/", async (_req, res) => {
+router.get("/", authenticate, async (req, res) => {
   try {
     logger.info("Inside getting task details for all tasks");
     const db = await new DBConnectionService().getDBConnection(DATABASE);
     const data = await db
-      .collection(COLLECTION)
+      .collection(Task_COLLECTION)
       .find({ isActive: true })
       .project(projection)
       .toArray();
@@ -62,7 +124,7 @@ router.get("/:taskId", async (req: any, res: any) => {
 
     const db = await new DBConnectionService().getDBConnection(DATABASE);
     const foundTask = await db
-      .collection(COLLECTION)
+      .collection(Task_COLLECTION)
       .findOne({ taskId, isActive: true }, { projection });
 
     if (foundTask) {
@@ -85,13 +147,15 @@ router.post("/", async (req: any, res: any) => {
     if (!task || !task.taskName) {
       return res.status(400).json({ error: "TaskName is required" });
     }
+
     const db = await new DBConnectionService().getDBConnection(DATABASE);
 
     task.isActive = true;
-    task.taskId = await getNextTaskIdFromDB(db);
-
-    await db.collection(COLLECTION).createIndex({ taskName: 1 }, { unique: true });
-    await db.collection(COLLECTION).insertOne(task);
+    task.taskId = await new HelperFunction().getNextTaskIdFromDB(db);
+    await db
+      .collection(Task_COLLECTION)
+      .createIndex({ taskName: 1 }, { unique: true });
+    await db.collection(Task_COLLECTION).insertOne(task);
     res
       .status(201)
       .json({ message: "Task created successfully", taskId: task.taskId });
@@ -119,7 +183,7 @@ router.put("/:taskId", async (req: any, res: any) => {
 
     const db = await new DBConnectionService().getDBConnection(DATABASE);
     const result = await db
-      .collection(COLLECTION)
+      .collection(Task_COLLECTION)
       .updateOne({ taskId, isActive: true }, { $set: updatedFields });
 
     if (result.matchedCount === 0) {
@@ -145,7 +209,7 @@ router.delete("/:taskId", async (req: any, res: any) => {
 
     const db = await new DBConnectionService().getDBConnection(DATABASE);
     const result = await db
-      .collection(COLLECTION)
+      .collection(Task_COLLECTION)
       .updateOne({ taskId, isActive: true }, { $set: { isActive: false } });
 
     if (result.matchedCount === 0) {
@@ -166,7 +230,7 @@ router.post("/chart", async (req: any, res: any) => {
     logger.info(`Inside getting chart data for chartKey:: ${chartkey}`);
     const db = await new DBConnectionService().getDBConnection(DATABASE);
     const chartDatas = await db
-      .collection(COLLECTION)
+      .collection(Task_COLLECTION)
       .aggregate([
         {
           $match: {
