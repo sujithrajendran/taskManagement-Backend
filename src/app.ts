@@ -7,7 +7,8 @@ const logger = LoggerFactory.getLogger();
 const app = express();
 app.use(
   cors({
-    origin: "https://taskmanagement-4l0e.onrender.com"
+    origin: "https://taskmanagement-4l0e.onrender.com",
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
