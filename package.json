@@ -22,7 +22,8 @@
     "node-persist": "^4.0.4",
     "pg": "^8.16.2",
     "uuid": "^11.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "express-rate-limit": "^7.5.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
