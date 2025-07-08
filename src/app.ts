@@ -9,6 +9,7 @@ app.use(
   cors({
     origin: "https://taskmanagement-4l0e.onrender.com",
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
   })
 );
 app.use(express.json());
