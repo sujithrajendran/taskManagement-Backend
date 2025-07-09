@@ -1,9 +1,10 @@
 import express from "express";
 import { LoggerFactory } from "../Logger/LoggerFactory";
-import DBConnectionService from "../dbService/DbConnectionService";
+import { DBConnectionService } from "../dbService/DbConnectionService";
 import { User } from "../model/User";
 import { HelperFunction } from "../Helpers/HelperFunction";
 import { authenticate } from "../Auth/Authenticate";
+import { EmailHelper } from "../Helpers/EmailHelper";
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -91,6 +92,56 @@ router.post("/login", async (req: any, res: any) => {
     res.json({ token });
   } catch (error) {
     logger.error("Error while login:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/forget-password", async (req: any, res: any) => {
+  try {
+    logger.info(`Inside resetPassword link generation::`);
+    const email = req.body.email;
+    if (!email) {
+      return res.status(400).json({ error: "Email ID is required" });
+    }
+    const db = await new DBConnectionService().getDBConnection(DATABASE);
+    const validateEmail = await db
+      .collection(SIGNIN_COLLECTION)
+      .findOne({ email, isActive: true }, { projection: { email: 1 } });
+
+    if (!validateEmail) {
+      return res.status(400).json({ error: "Email ID is not registered" });
+    }
+
+    const response = await new EmailHelper().sendEmail(email);
+    if (response) {
+      res.status(200).json({ message: "Reset link sent to email" });
+    } else {
+      res.status(500).json({ message: "Failed to send email" });
+    }
+  } catch (error) {
+    logger.error("Error while sending email:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/reset-password", authenticate, async (req: any, res: any) => {
+  try {
+    logger.info(`Inside reset password ::`);
+    const password = req.body.password;
+    const email = req.headers.email;
+    const hashed = await bcrypt.hash(password, 10);
+
+    const db = await new DBConnectionService().getDBConnection(DATABASE);
+    await db
+      .collection(SIGNIN_COLLECTION)
+      .findOneAndUpdate(
+        { isActive: true, email },
+        { $set: { password: hashed } }
+      );
+
+    res.status(200).json({ message: "Password reseted successfully" });
+  } catch (error) {
+    logger.error("Error while reseting password", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
