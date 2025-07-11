@@ -13,7 +13,7 @@ const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const SIGNIN_COLLECTION = "signin";
 const Task_COLLECTION = "task";
-const DATABASE = "kea_application_info";
+const DATABASE = "taskmanagement";
 const logger = LoggerFactory.getLogger();
 
 // Projection
