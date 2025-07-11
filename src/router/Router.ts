@@ -1,6 +1,6 @@
 import express from "express";
 import { LoggerFactory } from "../Logger/LoggerFactory";
-import { DBConnectionService } from "../dbService/DbConnectionService";
+import DBConnectionService from "../dbService/DbConnectionService";
 import { User } from "../model/User";
 import { HelperFunction } from "../Helpers/HelperFunction";
 import { authenticate } from "../Auth/Authenticate";
