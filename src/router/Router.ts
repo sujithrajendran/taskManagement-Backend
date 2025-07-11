@@ -1,17 +1,19 @@
 import express from "express";
 import { LoggerFactory } from "../Logger/LoggerFactory";
-import DBConnectionService from "../dbService/DbConnectionService";
+import { DBConnectionService } from "../dbService/DbConnectionService";
 import { User } from "../model/User";
 import { HelperFunction } from "../Helpers/HelperFunction";
 import { authenticate } from "../Auth/Authenticate";
 import { EmailHelper } from "../Helpers/EmailHelper";
+const { OAuth2Client } = require("google-auth-library");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
 const router = express.Router();
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const SIGNIN_COLLECTION = "signin";
 const Task_COLLECTION = "task";
-const DATABASE = "taskmanagement";
+const DATABASE = "kea_application_info";
 const logger = LoggerFactory.getLogger();
 
 // Projection
@@ -81,12 +83,13 @@ router.post("/login", async (req: any, res: any) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-
+    const expiryTime = "2m";
     const token = jwt.sign(
       { userId: user.userId, email: user.email },
       process.env.JWT_SECRET
+      // ,
       // {
-      //   expiresIn: "10h"
+      //   expiresIn: expiryTime
       // }
     );
     res.json({ token });
@@ -142,6 +145,28 @@ router.post("/reset-password", authenticate, async (req: any, res: any) => {
     res.status(200).json({ message: "Password reseted successfully" });
   } catch (error) {
     logger.error("Error while reseting password", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Google Login
+router.post("/google-login", async (req: any, res: any) => {
+  try {
+    const { email, sub: googleId } = req.body.token;
+    if (!email || !googleId) {
+      return res.status(400).json({ error: "Invalid Google user data" });
+    }
+
+    const appToken = jwt.sign(
+      { email, googleId },
+      process.env.JWT_SECRET
+      // ,
+      // { expiresIn: "1h" }
+    );
+
+    res.json({ token: appToken });
+  } catch (error) {
+    console.error("Error during Google login", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -242,7 +267,12 @@ router.put("/:taskId", async (req: any, res: any) => {
     }
 
     res.status(200).json({ message: "Task updated successfully" });
-  } catch (error) {
+  } catch (error: any) {
+    console.log("error---", JSON.stringify(error));
+
+    if (error.code === 11000 && error.keyPattern?.taskName) {
+      return res.status(400).json({ error: "Task already present" });
+    }
     logger.error("Error while updating task:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
