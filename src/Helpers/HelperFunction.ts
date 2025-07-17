@@ -5,7 +5,7 @@ import { LoggerFactory } from "../Logger/LoggerFactory";
 
 const SIGNIN_COLLECTION = "signin";
 const Task_COLLECTION = "task";
-const DATABASE = "kea_application_info";
+const DATABASE = "taskmanagement";
 const logger = LoggerFactory.getLogger();
 
 export class HelperFunction {
