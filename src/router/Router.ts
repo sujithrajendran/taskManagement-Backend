@@ -43,6 +43,7 @@ router.post("/register", async (req: any, res: any) => {
       req.body.email,
       new Date(),
       userId,
+      true,
       false
     );
     const hashed = await bcrypt.hash(user.password, 10);
