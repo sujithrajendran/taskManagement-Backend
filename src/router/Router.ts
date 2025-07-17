@@ -16,7 +16,6 @@ const Task_COLLECTION = "task";
 const DATABASE = "taskmanagement";
 const logger = LoggerFactory.getLogger();
 
-// Projection
 const projection = {
   _id: 0,
   taskName: 1,
