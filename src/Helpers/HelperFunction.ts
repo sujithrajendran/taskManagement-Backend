@@ -1,5 +1,5 @@
 import { Db } from "mongodb";
-import { DBConnectionService } from "../dbService/DbConnectionService";
+import DBConnectionService from "../dbService/DbConnectionService";
 import { User } from "../model/User";
 import { LoggerFactory } from "../Logger/LoggerFactory";
 
