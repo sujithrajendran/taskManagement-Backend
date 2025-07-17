@@ -1,5 +1,5 @@
 import { Db } from "mongodb";
-import DBConnectionService  from "../dbService/DbConnectionService";
+import DBConnectionService from "../dbService/DbConnectionService";
 import { User } from "../model/User";
 import { LoggerFactory } from "../Logger/LoggerFactory";
 
@@ -48,7 +48,15 @@ export class HelperFunction {
         if (!existingUser) {
           logger.info(`Inside inserting user details ::`);
           const userId = await new HelperFunction().getNextUserIdFromDB(db);
-          const user = new User(username, "", email, new Date(), userId, true);
+          const user = new User(
+            username,
+            "",
+            email,
+            new Date(),
+            userId,
+            true,
+            true
+          );
           await db.collection(SIGNIN_COLLECTION).insertOne(user);
         }
       } catch (err) {
