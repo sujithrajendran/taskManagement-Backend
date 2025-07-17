@@ -298,12 +298,13 @@ router.post("/", async (req: any, res: any) => {
     const db = await new DBConnectionService().getDBConnection(DATABASE);
     task.isActive = true;
     task.taskId = await new HelperFunction().getNextTaskIdFromDB(db);
-    await db.collection(Task_COLLECTION).createIndex(
-      { taskName: 1 },
-      {
-        unique: true
-      }
-    );
+   await db.collection(Task_COLLECTION).createIndex(
+  { taskName: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { isActive: true }
+  }
+);
     await db.collection(Task_COLLECTION).insertOne(task);
     res
       .status(201)
