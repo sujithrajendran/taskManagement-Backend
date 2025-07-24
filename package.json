@@ -35,7 +35,7 @@
     "pg": "^8.16.2",
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
-  }
+  },
  "devDependencies": {
     "@types/cls-hooked": "^4.3.9",
     "@types/cors": "^2.8.19",
