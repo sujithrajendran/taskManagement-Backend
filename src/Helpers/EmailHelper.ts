@@ -7,13 +7,9 @@ const path = require("path");
 
 export class EmailHelper {
   async sendForgetPasswordMail(email: string) {
-    const token = jwt.sign(
-      { email: email },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h"
-      }
-    );
+    const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+      expiresIn: "1h"
+    });
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -83,5 +79,52 @@ export class EmailHelper {
     let html = fs.readFileSync(templatePath, "utf-8");
     html = html.replace("{{RESET_LINK}}", resetLink);
     return html;
+  }
+
+  async sendTaskNotification(taskData: any, email: string) {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+    const html = this.getAssignTaskTemplate(taskData);
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: `New Task Assigned: ${taskData.taskName}`,
+      html
+    };
+    try {
+      logger.info(`Inside sending email to user ::`);
+      return await transporter.sendMail(mailOptions);
+    } catch (error) {
+      throw new Error("Error while sending Email");
+    }
+  }
+
+  getAssignTaskTemplate(taskData: any) {
+    const templatePath = path.join(
+      process.cwd(),
+      "src",
+      "Design",
+      "TaskAssign.html"
+    );
+    let template = fs.readFileSync(templatePath, "utf-8");
+
+    template = template
+      .replace(/{{userName}}/g, taskData.userName || "")
+      .replace(/{{taskName}}/g, taskData.taskName || "")
+      .replace(/{{description}}/g, taskData.description || "")
+      .replace(/{{priority}}/g, taskData.priority || "")
+      .replace(/{{status}}/g, taskData.status || "")
+      .replace(/{{dueDate}}/g, taskData.createdAt || "")
+      .replace(
+        /{{taskLink}}/g,
+        `${process.env.FRONTEND_URL}/task/${taskData.taskId}` || "#"
+      );
+    logger.info(`template :: ${JSON.stringify(template)}`);
+    return template;
   }
 }
