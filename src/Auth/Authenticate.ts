@@ -18,3 +18,30 @@ export const authenticate = (req: any, res: any, next: NextFunction) => {
     }
   );
 };
+
+export const authenticateSocket = (
+  token: string,
+  io: any
+): Promise<{ userId: string; email: string }> => {
+  return new Promise((resolve, reject) => {
+    if (!token) return reject(new Error("Token missing"));
+
+    const jwtToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+
+    jwt.verify(
+      jwtToken,
+      process.env.JWT_SECRET as string,
+      (err: any, decoded: any) => {
+        if (err) {
+          io.emit("authError", { error: "Invalid token." });
+          return reject(new Error("Invalid token."));
+        }
+
+        resolve({
+          userId: decoded.userId,
+          email: decoded.email
+        });
+      }
+    );
+  });
+};
