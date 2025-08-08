@@ -64,4 +64,15 @@ export class HelperFunction {
       }
     })();
   }
+
+  static async getEmailIdFromTask(TaskData: any) {
+    const db = await new DBConnectionService().getDBConnection(DATABASE);
+    const foundTask = await db
+      .collection(SIGNIN_COLLECTION)
+      .findOne(
+        { userName: TaskData["createdBy"] },
+        { projection: { email: 1 } }
+      );
+    return foundTask?.email ? foundTask?.email : "";
+  }
 }
