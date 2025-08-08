@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Task Assigned</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f7;
+        padding: 0;
+        margin: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      h2 {
+        color: #333;
+      }
+      p {
+        color: #555;
+        line-height: 1.6;
+      }
+      .task-info {
+        background-color: #f0f4ff;
+        padding: 10px 15px;
+        margin: 20px 0;
+        border-left: 4px solid #f0ac46;
+        border-radius: 4px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #f0ac46;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 20px;
+      }
+      .footer {
+        font-size: 12px;
+        color: #999;
+        text-align: center;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Hello {{userName}},</h2>
+      <p>A new task has been assigned to you.</p>
+
+      <div class="task-info">
+        <strong>Task Name:</strong> {{taskName}}<br />
+        <strong>Description:</strong> {{description}}<br />
+        <strong>Priority:</strong> {{priority}}<br />
+        <strong>Status:</strong> {{status}}<br />
+        <strong>Due Date:</strong> {{dueDate}}
+      </div>
+
+      <p>You can view or update the task by clicking the button below:</p>
+
+      <a href="{{taskLink}}" class="btn">View Task</a>
+
+      <p class="footer">
+        If you have any questions, reply to this email. <br />
+        Task Management App © 2025
+      </p>
+    </div>
+  </body>
+</html>
