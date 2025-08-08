@@ -29,17 +29,17 @@
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
   },
-  "devDependencies": {
-    "@types/cls-hooked": "^4.3.9",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.0.4",
-    "@types/nodemailer": "^6.4.17",
-    "@types/pg": "^8.15.4",
-    "@types/socket.io": "^4.4.10",
-    "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
-  }
+ "devDependencies": {
+  "@types/cls-hooked": "^4.3.9",
+  "@types/cors": "^2.8.19",
+  "@types/express": "^5.0.3",
+  "@types/jsonwebtoken": "^9.0.10",
+  "@types/node": "^24.0.4",
+  "@types/nodemailer": "^6.4.17",
+  "@types/pg": "^8.15.4",
+  "nodemon": "^3.1.10",
+  "ts-node": "^10.9.2",
+  "typescript": "^5.8.3"
+}
+
 }
