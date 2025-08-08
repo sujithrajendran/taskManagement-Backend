@@ -9,41 +9,33 @@ import DBConnectionService from "./dbService/DbConnectionService";
 import router from "./router/Router";
 import { authenticateSocket } from "./Auth/Authenticate";
 import { EmailHelper } from "./Helpers/EmailHelper";
-const rateLimit = require("express-rate-limit");
 
-const logger = LoggerFactory.getLogger();
 const app = express();
-
-const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 1000,
-  keyGenerator: (req: any) => req.ip,
-  skip: (req: any) => req.user && req.user.isAdmin,
-  handler: (req: any, res: any) => {
-    res.status(429).json({ error: "Calm down! Try again later." });
-  }
-});
-app.use(limiter);
-app.use(traceMiddleware);
-
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "https://taskmanagement-4l0e.onrender.com"
   }
 });
 
-app.use(
-  cors({
-    origin: "https://taskmanagement-4l0e.onrender.com",
-  })
-);
-
-app.use(express.json());
-
+app.use(server, {
+  cors: {
+    origin: "https://taskmanagement-4l0e.onrender.com"
+  }
+});
+const logger = LoggerFactory.getLogger();
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 1000
+});
 
 const SIGNIN_COLLECTION = "signin";
 const DATABASE = "taskmanagement";
 const TASK_COLLECTION = "task";
+
+app.use(cors());
+app.use(express.json());
+app.use(limiter);
 
 const projection = {
   _id: 0,
@@ -255,6 +247,7 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use("/api/tasks", taskRoutes);
-
-app.listen(4000, () => logger.info("Server running on port 4000"));
+app.use("/api/tasks", router);
+server.listen(4000, () => {
+  logger.info("Server running on port 4000");
+});
