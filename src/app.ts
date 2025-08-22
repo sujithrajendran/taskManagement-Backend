@@ -17,11 +17,11 @@ const io = new Server(server, {
     origin: "https://taskmanagement-4l0e.onrender.com"
   }
 });
-app.use(
-  cors({
-    origin: "https://taskmanagement-4l0e.onrender.com",
-  })
-);
+// app.use(
+//   cors({
+//     origin: "https://taskmanagement-4l0e.onrender.com",
+//   })
+// );
 
 app.use(server, {
   cors: {
