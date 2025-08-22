@@ -116,12 +116,11 @@ io.on("connection", (socket) => {
       );
       await db.collection(TASK_COLLECTION).insertOne(taskData);
       io.emit("createTask", { message: "Task created Successfully" });
-      const email = await HelperFunction.getEmailIdFromTask(taskData);
+      // const email = await HelperFunction.getEmailIdFromTask(taskData);
+      const email = "ktmsujithrajendran@gmail.com";
+
       if (email) {
-        const response = await new EmailHelper().sendTaskNotification(
-          taskData,
-          email
-        );
+        await new EmailHelper().sendTaskNotification(taskData, email, "create");
       }
     } catch (error) {
       logger.error("Socket error while creating task:", error);
@@ -155,9 +154,10 @@ io.on("connection", (socket) => {
   });
 
   // Update Task
-  socket.on("updateTask", async (taskData) => {
+   socket.on("updateTask", async (taskData) => {
     try {
       const updatedFields = taskData.taskData;
+      taskData.taskData["taskId"] = parseInt(taskData.taskId);
       const taskId = parseInt(taskData.taskId);
       logger.info(
         `Updating taskId: ${taskId} with data: ${JSON.stringify(updatedFields)}`
@@ -177,7 +177,16 @@ io.on("connection", (socket) => {
       }
 
       io.emit("updateTask", { message: "Task updated successfully" });
-      // TODO: Need to send mail if the task is completed
+      if (updatedFields.status === "Closed") {
+        const email = await HelperFunction.getEmailIdFromTask(taskData);
+        if (email) {
+          await new EmailHelper().sendTaskNotification(
+            taskData.taskData,
+            email,
+            "closed"
+          );
+        }
+      }
     } catch (error: any) {
       if (error.code === 11000 && error.keyPattern?.taskName) {
         io.emit("error", { error: "Task already present" });
