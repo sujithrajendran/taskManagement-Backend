@@ -116,9 +116,7 @@ io.on("connection", (socket) => {
       );
       await db.collection(TASK_COLLECTION).insertOne(taskData);
       io.emit("createTask", { message: "Task created Successfully" });
-      // const email = await HelperFunction.getEmailIdFromTask(taskData);
-      const email = "ktmsujithrajendran@gmail.com";
-
+      const email = await HelperFunction.getEmailIdFromTask(taskData);
       if (email) {
         await new EmailHelper().sendTaskNotification(taskData, email, "create");
       }
