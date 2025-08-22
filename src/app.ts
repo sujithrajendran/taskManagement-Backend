@@ -23,11 +23,11 @@ const io = new Server(server, {
 //   })
 // );
 
-app.use(server, {
-  cors: {
-    origin: "https://taskmanagement-4l0e.onrender.com"
-  }
-});
+// app.use(server, {
+//   cors: {
+//     origin: "https://taskmanagement-4l0e.onrender.com"
+//   }
+// });
 const logger = LoggerFactory.getLogger();
 const limiter = rateLimit({
   windowMs: 60 * 1000,
