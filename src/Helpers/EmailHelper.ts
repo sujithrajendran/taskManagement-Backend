@@ -81,7 +81,7 @@ export class EmailHelper {
     return html;
   }
 
-  async sendTaskNotification(taskData: any, email: string) {
+  async sendTaskNotification(taskData: any, email: string, taskType: string) {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -89,11 +89,18 @@ export class EmailHelper {
         pass: process.env.EMAIL_PASS
       }
     });
-    const html = this.getAssignTaskTemplate(taskData);
+
+    const html = this.getAssignTaskTemplate(taskData, taskType);
+    let taskSubject = "New Task Assigned: ";
+
+    if (taskType === "closed") {
+      taskSubject = "Task closed:";
+    }
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: `New Task Assigned: ${taskData.taskName}`,
+      subject: `${taskSubject} ${taskData.taskName}`,
       html
     };
     try {
@@ -104,13 +111,17 @@ export class EmailHelper {
     }
   }
 
-  getAssignTaskTemplate(taskData: any) {
+  getAssignTaskTemplate(taskData: any, taskType: string) {
     const templatePath = path.join(
       process.cwd(),
       "src",
       "Design",
       "TaskAssign.html"
     );
+    let taskHeading = "A new task has been assigned to you";
+    if (taskType === "closed") {
+      taskHeading = "Task has been completed and closed";
+    }
     let template = fs.readFileSync(templatePath, "utf-8");
 
     template = template
@@ -120,6 +131,7 @@ export class EmailHelper {
       .replace(/{{priority}}/g, taskData.priority || "")
       .replace(/{{status}}/g, taskData.status || "")
       .replace(/{{dueDate}}/g, taskData.createdAt || "")
+      .replace(/{{taskHeading}}/g, taskHeading)
       .replace(
         /{{taskLink}}/g,
         `${process.env.FRONTEND_URL}/task/${taskData.taskId}` || "#"
