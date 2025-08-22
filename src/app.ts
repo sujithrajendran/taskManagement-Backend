@@ -156,9 +156,9 @@ io.on("connection", (socket) => {
   // Update Task
    socket.on("updateTask", async (taskData) => {
     try {
-      const updatedFields = taskData.taskData;
       taskData.taskData["taskId"] = parseInt(taskData.taskId);
       const taskId = parseInt(taskData.taskId);
+      const updatedFields = taskData.taskData;
       logger.info(
         `Updating taskId: ${taskId} with data: ${JSON.stringify(updatedFields)}`
       );
@@ -177,13 +177,15 @@ io.on("connection", (socket) => {
       }
 
       io.emit("updateTask", { message: "Task updated successfully" });
-      if (updatedFields.status === "Completed") {
-        const email = await HelperFunction.getEmailIdFromTask(taskData);
+      if (updatedFields.status === "Closed") {
+        const email = await HelperFunction.getEmailIdFromTask(updatedFields);
+        console.log("email000",email);
+        
         if (email) {
           await new EmailHelper().sendTaskNotification(
-            taskData.taskData,
+            updatedFields,
             email,
-            "Completed"
+            "closed"
           );
         }
       }
