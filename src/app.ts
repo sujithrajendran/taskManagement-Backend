@@ -177,13 +177,13 @@ io.on("connection", (socket) => {
       }
 
       io.emit("updateTask", { message: "Task updated successfully" });
-      if (updatedFields.status === "Closed") {
+      if (updatedFields.status === "Completed") {
         const email = await HelperFunction.getEmailIdFromTask(taskData);
         if (email) {
           await new EmailHelper().sendTaskNotification(
             taskData.taskData,
             email,
-            "closed"
+            "Completed"
           );
         }
       }
