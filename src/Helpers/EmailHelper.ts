@@ -93,8 +93,8 @@ export class EmailHelper {
     const html = this.getAssignTaskTemplate(taskData, taskType);
     let taskSubject = "New Task Assigned: ";
 
-    if (taskType === "closed") {
-      taskSubject = "Task closed:";
+    if (taskType === "Completed") {
+      taskSubject = "Task Completed:";
     }
 
     const mailOptions = {
@@ -119,8 +119,8 @@ export class EmailHelper {
       "TaskAssign.html"
     );
     let taskHeading = "A new task has been assigned to you";
-    if (taskType === "closed") {
-      taskHeading = "Task has been completed and closed";
+    if (taskType === "Completed") {
+      taskHeading = "Task has been completed";
     }
     let template = fs.readFileSync(templatePath, "utf-8");
 
